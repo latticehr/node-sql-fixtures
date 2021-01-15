@@ -36,6 +36,39 @@ describe('resolve-dependencies', function() {
     });
   });
 
+  it('should resolve extra dependencies', function() {
+    var toBeResolved = {
+      Challenges: [{
+        type: 'User',
+        foo: 'u0'
+      }]
+    };
+
+    var previouslyResolved = {
+      Users: [{
+        id: 4,
+        specId: 'u0'
+      }]
+    };
+
+    var options = {
+      extraResolver: function (table, entry, resolve) {
+        if (table != 'Challenges') return;
+        if (entry.type != 'User') return;
+        entry.foo = resolve('Users:' + entry.foo);
+        return entry;
+      }
+    };
+
+    var resolved = resolveDependencies(previouslyResolved, toBeResolved, options);
+    expect(resolved).to.eql({
+      Challenges: [{
+        type: 'User',
+        foo: 4
+      }]
+    });
+  });
+
   it('should resolve a non-default property', function() {
     var toBeResolved = {
       Challenges: [{

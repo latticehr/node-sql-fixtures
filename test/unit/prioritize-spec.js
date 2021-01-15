@@ -45,6 +45,50 @@ describe('prioritize', function() {
       }]);
     });
 
+    it('should prioritize with extra dependencies', function() {
+      var config = {
+        Users: {
+          username: 'bob',
+          specId: 'u0'
+        },
+        Challenges: [{
+          type: 'User',
+          value: 'u0',
+          specId: 'c0'
+        },{
+          type: 'Foo',
+          value: 'bla',
+          specId: 'c1'
+        }]
+      };
+
+      var options = {
+        extraDependencies: function (table, entry) {
+          if (table != 'Challenges') return;
+          if (entry.type != 'User') return;
+          return [['Users', entry.value]];
+        }
+      };
+
+      expect(prioritize(config, options)).to.eql([{
+        Challenges: [{
+          specId: "c1",
+          type: "Foo",
+          value: "bla"
+        }],
+        Users: [{
+          username: 'bob',
+          specId: 'u0'
+        }]
+      }, {
+        Challenges: [{
+          type: 'User',
+          value: 'u0',
+          specId: 'c0'
+        }]
+      }]);
+    });
+
     it('should prioritize later dependencies correctly', function() {
       var config = {
         Users: [{
